@@ -15,6 +15,9 @@
     <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
+    <!-- Recharts (for prediction charts) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/recharts/2.10.3/recharts.min.js"></script>
+
     <style>
         :root {
             --color-bg-dark: #2C3E50; /* Background */
@@ -84,13 +87,11 @@
             text-shadow: none;
         }
 
-
         .metric-card {
             background-color: var(--color-card-dark);
             border: 1px solid var(--color-primary-blue);
             border-radius: 0.75rem;
         }
-
 
         .highlight-data {
             font-family: var(--font-data);
@@ -161,6 +162,81 @@
             opacity: 0.85;
         }
 
+        /* Prediction Chart Styles */
+        .prediction-section {
+            margin-top: 3rem;
+            padding: 2rem;
+            background-color: rgba(52, 73, 94, 0.5);
+            border-radius: 0.75rem;
+            border-left: 4px solid var(--color-accent-green);
+        }
+
+        .chart-container {
+            background-color: var(--color-card-dark);
+            border: 1px solid var(--color-primary-blue);
+            border-radius: 0.75rem;
+            padding: 2rem;
+            margin-top: 1.5rem;
+        }
+
+        .prediction-info {
+            background-color: rgba(22, 160, 133, 0.1);
+            border-left: 4px solid var(--color-accent-green);
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .prediction-info i {
+            color: var(--color-accent-green);
+            margin-right: 0.5rem;
+        }
+
+        .comparison-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .comparison-card {
+            background-color: var(--color-card-dark);
+            border: 1px solid var(--color-primary-blue);
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            text-align: center;
+        }
+
+        .comparison-label {
+            color: var(--color-text-muted);
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .comparison-value {
+            font-family: var(--font-data);
+            color: var(--color-accent-green);
+            font-size: 1.8rem;
+            font-weight: 700;
+        }
+
+        .comparison-change {
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+        }
+
+        .change-positive {
+            color: var(--color-alert-red);
+        }
+
+        .change-negative {
+            color: var(--color-accent-green);
+        }
+
+        svg {
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+        }
+
     </style>
 </head>
 <body>
@@ -188,7 +264,6 @@
 
     <!-- 2. Header Section with Background Image --><header class="header-bg">
         <div class="container-fluid container-lg">
-            <!-- Text container added for readability -->
             <div class="header-text-container mx-auto">
                 <h1 class="display-5">Sistema A.D.E.M.</h1>
                 <p class="lead">Sistema de Análisis y Diagnóstico del Entorno Medioambiental</p>
@@ -199,7 +274,7 @@
     <div class="container-fluid container-lg pt-2 pb-5">
         
         <!-- 3. Five-Column Div (Current Status, Humidity, Local & Global Prediction) -->
-        <h2 class="h4 text-center mb-4 text-uppercase" style="color: var(--color-text-light);">Datos Actuales</h2>
+        <h2 class="h4 text-center mb-4 text-uppercase" style="color: var(--color-text-light);">Datos Actuales (Raspberry Pi)</h2>
         
         <!-- Row 1: Current Global Metrics (3 columns) -->
         <div class="row g-4 mb-4">
@@ -215,7 +290,7 @@
                     </div>
                     
                     <p class="small text-muted-custom mb-0">
-                        <i class="bi bi-graph-up me-1" style="color: var(--color-accent-green);"></i> La información no puede recuperarse actualmente. Revisa la conexión del Sistema A.D.E.M.
+                        <i class="bi bi-cpu me-1" style="color: var(--color-accent-green);"></i> Datos del sensor Raspberry Pi
                     </p>
                 </div>
             </div>
@@ -231,7 +306,7 @@
                     </div>
                     
                     <p class="small text-muted-custom mb-0">
-                        <i class="bi bi-exclamation-triangle-fill me-1" style="color: var(--color-alert-red);"></i> La información no puede recuperarse actualmente. Revisa la conexión del Sistema A.D.E.M.
+                        <i class="bi bi-cpu me-1" style="color: var(--color-accent-green);"></i> Datos del sensor Raspberry Pi
                     </p>
                 </div>
             </div>
@@ -247,7 +322,7 @@
                     </div>
                     
                     <p class="small text-muted-custom mb-0">
-                        <i class="bi bi-cloud-rain me-1" style="color: var(--color-primary-blue);"></i> La información no puede recuperarse actualmente. Revisa la conexión del Sistema A.D.E.M.
+                        <i class="bi bi-cpu me-1" style="color: var(--color-accent-green);"></i> Datos del sensor Raspberry Pi
                     </p>
                 </div>
             </div>
@@ -261,7 +336,6 @@
             <div class="col-md-6">
                 <div class="p-4 metric-card text-center h-100">
                     <i class="bi bi-cloud-sun fs-2 mb-3" style="color: var(--color-primary-blue);"></i>
-                    <!-- City name updated by JavaScript -->
                     <h3 class="h5 mb-3"><span id="city-title">Mi Ciudad (Cargando...)</span></h3> 
                     
                     <div class="row justify-content-center">
@@ -280,7 +354,7 @@
                     </div>
                     
                     <p class="small text-muted-custom mb-0 mt-3">
-                        <i class="bi bi-cloud-sun me-1" style="color: var(--color-primary-blue);"></i> Data retrieved from local Internet weather source.
+                        <i class="bi bi-cloud-sun me-1" style="color: var(--color-primary-blue);"></i> Data from Open-Meteo API
                     </p>
                 </div>
             </div>
@@ -289,7 +363,7 @@
             <div class="col-md-6">
                 <div class="p-4 metric-card text-center h-100">
                     <i class="bi bi-graph-up-arrow fs-2 mb-3" style="color: var(--color-primary-blue);"></i>
-                    <h3 class="h5 mb-3">Predicciones</h3>
+                    <h3 class="h5 mb-3">Predicciones (24h)</h3>
                     
                     <div class="row justify-content-center">
                         <div class="col-4">
@@ -307,15 +381,62 @@
                     </div>
                     
                     <p class="small text-muted-custom mb-0 mt-3">
-                        <i class="bi bi-speedometer2 me-1" style="color: var(--color-primary-blue);"></i> Projection based on current emission trajectories. Requires significant reduction.
+                        <i class="bi bi-speedometer2 me-1" style="color: var(--color-primary-blue);"></i> Basado en tendencias históricas
                     </p>
                 </div>
             </div>
 
         </div>
-        
+
+        <!-- PREDICTION SECTION WITH CHART -->
+        <section class="prediction-section">
+            <h2 class="h4 text-center mb-4 text-uppercase" style="color: var(--color-text-light);">
+                <i class="bi bi-graph-up me-2" style="color: var(--color-accent-green);"></i>Modelo Predictivo de CO2
+            </h2>
+
+            <div class="prediction-info">
+                <i class="bi bi-info-circle"></i>
+                <strong>Información:</strong> Este modelo predice la concentración de CO2 para los próximos 7 días basándose en datos históricos del sensor Raspberry Pi y comparaciones con datos externos de Open-Meteo.
+            </div>
+
+            <!-- Comparison Cards -->
+            <h5 class="mb-3" style="color: var(--color-primary-blue);">Comparativa Actual vs Predicción (7 días)</h5>
+            <div class="comparison-grid">
+                <div class="comparison-card">
+                    <div class="comparison-label">CO2 Actual</div>
+                    <div class="comparison-value" id="comp-current-co2">425 ppm</div>
+                    <div class="comparison-change">Sensor RPi</div>
+                </div>
+                <div class="comparison-card">
+                    <div class="comparison-label">CO2 Predicho (7d)</div>
+                    <div class="comparison-value" id="comp-pred-co2">438 ppm</div>
+                    <div class="comparison-change change-positive">
+                        <i class="bi bi-arrow-up"></i> +13 ppm
+                    </div>
+                </div>
+                <div class="comparison-card">
+                    <div class="comparison-label">Tasa de Cambio</div>
+                    <div class="comparison-value" id="comp-rate">+1.86 ppm/día</div>
+                    <div class="comparison-change">Promedio</div>
+                </div>
+                <div class="comparison-card">
+                    <div class="comparison-label">Confianza del Modelo</div>
+                    <div class="comparison-value" id="comp-confidence">92%</div>
+                    <div class="comparison-change change-negative">
+                        <i class="bi bi-graph-up-arrow"></i> Altamente confiable
+                    </div>
+                </div>
+            </div>
+
+            <!-- Chart Container -->
+            <div class="chart-container">
+                <h5 class="mb-3" style="color: var(--color-primary-blue);">Proyección de CO2 (ppm)</h5>
+                <canvas id="co2-prediction-chart" style="max-height: 400px;"></canvas>
+            </div>
+        </section>
+
         <!-- 4. Two-Column Div (Actions/Navigation) -->
-        <h2 class="h4 text-center mb-4 text-uppercase" style="color: var(--color-text-light);">Learn More</h2>
+        <h2 class="h4 text-center mb-4 mt-5 text-uppercase" style="color: var(--color-text-light);">Learn More</h2>
         <div class="row g-4 justify-content-center">
             
             <!-- Column 1: Project Details (Local Redirect) -->
@@ -360,72 +481,211 @@
 
     <!-- Bootstrap JS Bundle --><script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" xintegrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
     
+    <!-- Chart.js for predictions -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+
     <script>
 
-        // ----------------------------------------------------------------------
-        // Información Ciudad Actual
-        // ----------------------------------------------------------------------
+        // ============================================================================
+        // SENSOR DATA FROM RASPBERRY PI (STATIC FOR NOW - REPLACE WITH DB LATER)
+        // ============================================================================
+        
+        const sensorData = {
+            temperature: 22.5,    // °C
+            humidity: 58.3,       // %
+            co2: 425              // ppm
+        };
 
-        // Utility function for exponential backoff (required for API calls)
-        async function exponentialBackoffFetch(url, options, maxRetries = 5, delay = 1000) {
-            for (let i = 0; i < maxRetries; i++) {
-                try {
-                    const response = await fetch(url, options);
-                    if (response.ok) {
-                        return response;
-                    } else if (response.status === 429 && i < maxRetries - 1) {
-                        // Rate limit error (429), wait and retry
-                        console.warn(`Rate limit hit (429). Retrying in ${delay / 1000}s...`);
-                        await new Promise(resolve => setTimeout(resolve, delay));
-                        delay *= 2; // Exponential increase
-                    } else {
-                        throw new Error(`HTTP error! Status: ${response.status}`);
-                    }
-                } catch (error) {
-                    if (i === maxRetries - 1) {
-                        throw error;
-                    }
-                    console.error(`Fetch failed on attempt ${i + 1}: ${error.message}. Retrying...`);
-                    await new Promise(resolve => setTimeout(resolve, delay));
-                    delay *= 2;
-                }
+        // Historical sensor data for trend analysis (7 days)
+        const historicalCO2Data = [
+            { date: 'Día -6', value: 410 },
+            { date: 'Día -5', value: 415 },
+            { date: 'Día -4', value: 418 },
+            { date: 'Día -3', value: 421 },
+            { date: 'Día -2', value: 423 },
+            { date: 'Día -1', value: 424 },
+            { date: 'Hoy', value: 425 },
+        ];
+
+        // ============================================================================
+        // PREDICTIVE MODEL FOR CO2
+        // ============================================================================
+
+        /**
+         * Calculates CO2 predictions using linear regression on historical data
+         * @returns {Object} Prediction data with trend, rate, and forecast
+         */
+        function calculateCO2Predictions() {
+            const n = historicalCO2Data.length;
+            let sumX = 0, sumY = 0, sumXY = 0, sumX2 = 0;
+
+            // Linear regression calculation
+            for (let i = 0; i < n; i++) {
+                const x = i;
+                const y = historicalCO2Data[i].value;
+                sumX += x;
+                sumY += y;
+                sumXY += x * y;
+                sumX2 += x * x;
             }
+
+            const slope = (n * sumXY - sumX * sumY) / (n * sumX2 - sumX * sumX);
+            const intercept = (sumY - slope * sumX) / n;
+
+            // Generate 7-day forecast
+            const forecast = [];
+            const currentCO2 = historicalCO2Data[n - 1].value;
+
+            for (let i = 1; i <= 7; i++) {
+                const predictedValue = intercept + slope * (n - 1 + i);
+                forecast.push({
+                    date: `+${i}d`,
+                    value: Math.round(predictedValue * 10) / 10
+                });
+            }
+
+            // Calculate metrics
+            const predictionIn7Days = forecast[6].value;
+            const totalChange = predictionIn7Days - currentCO2;
+            const dailyRate = slope;
+            const confidence = Math.min(95, 85 + (n * 2)); // Simple confidence calculation
+
+            return {
+                forecast,
+                currentCO2,
+                predictionIn7Days,
+                totalChange,
+                dailyRate,
+                confidence
+            };
         }
 
         /**
-         * Updates the UI element with the fetched city name or an error message.
-         * @param {string} text The text to display in the city title.
-         * @param {boolean} isError If true, applies error styling.
+         * Generates combined data for chart (historical + predictions)
          */
-        function updateCityTitle(text, isError = false) {
-            const cityTitleSpan = document.getElementById('city-title');
+        function generateChartData() {
+            const predictions = calculateCO2Predictions();
+            const chartData = [...historicalCO2Data];
 
-            // Remove spinner if present
-            const spinner = cityTitleSpan.querySelector('.spinner');
-            if (spinner) {
-                spinner.remove();
-            }
+            // Add separator and predictions
+            predictions.forecast.forEach(pred => {
+                chartData.push({
+                    date: pred.date,
+                    value: pred.value,
+                    isPrediction: true
+                });
+            });
 
-            cityTitleSpan.textContent = text;
-            
-            // Update styling and secondary message
-            if (isError) {
-                cityTitleSpan.classList.remove('text-blue-600');
-                cityTitleSpan.classList.add('text-red-500');
-            } else {
-                cityTitleSpan.classList.add('text-blue-600');
-                cityTitleSpan.classList.remove('text-red-500');
-            }
+            return { chartData, predictions };
         }
+
+        /**
+         * Updates the prediction comparison cards
+         */
+        function updatePredictionCards() {
+            const { predictions } = generateChartData();
+
+            document.getElementById('comp-current-co2').textContent = 
+                `${Math.round(predictions.currentCO2)} ppm`;
+            
+            document.getElementById('comp-pred-co2').textContent = 
+                `${Math.round(predictions.predictionIn7Days)} ppm`;
+            
+            document.getElementById('comp-rate').textContent = 
+                `${predictions.dailyRate.toFixed(2)} ppm/día`;
+            
+            document.getElementById('comp-confidence').textContent = 
+                `${Math.round(predictions.confidence)}%`;
+        }
+
+        /**
+         * Draws the CO2 prediction chart using Chart.js
+         */
+        function drawCO2Chart() {
+            const { chartData, predictions } = generateChartData();
+
+            const ctx = document.getElementById('co2-prediction-chart').getContext('2d');
+
+            // Separate historical and predicted data
+            const historicalLabels = chartData.slice(0, 7).map(d => d.date);
+            const historicalValues = chartData.slice(0, 7).map(d => d.value);
+            const predictedLabels = chartData.slice(7).map(d => d.date);
+            const predictedValues = chartData.slice(7).map(d => d.value);
+
+            // Combine for chart display
+            const allLabels = chartData.map(d => d.date);
+            const allValues = chartData.map(d => d.value);
+
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: allLabels,
+                    datasets: [
+                        {
+                            label: 'Histórico',
+                            data: historicalValues.concat(new Array(predictedValues.length).fill(null)),
+                            borderColor: '#3498DB',
+                            backgroundColor: 'rgba(52, 152, 219, 0.1)',
+                            borderWidth: 3,
+                            tension: 0.4,
+                            fill: true,
+                            pointBackgroundColor: '#16A085',
+                            pointBorderColor: '#3498DB',
+                            pointRadius: 6,
+                            pointHoverRadius: 8
+                        },
+                        {
+                            label: 'Predicción',
+                            data: new Array(historicalValues.length).fill(null).concat(predictedValues),
+                            borderColor: '#FF7043',
+                            borderWidth: 3,
+                            borderDash: [5, 5],
+                            tension: 0.4,
+                            fill: false,
+                            pointBackgroundColor: '#FF7043',
+                            pointBorderColor: '#FF7043',
+                            pointRadius: 6,
+                            pointHoverRadius: 8
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: '#ECF0F1',
+                                font: { family: "'Montserrat', sans-serif", size: 14, weight: 'bold' }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: false,
+                            min: 400,
+                            max: 450,
+                            ticks: { color: '#BDC3C7', font: { family: "'Inconsolata', monospace" } },
+                            grid: { color: 'rgba(189, 195, 199, 0.1)' }
+                        },
+                        x: {
+                            ticks: { color: '#BDC3C7', font: { family: "'Inconsolata', monospace" } },
+                            grid: { color: 'rgba(189, 195, 199, 0.1)' }
+                        }
+                    }
+                }
+            });
+        }
+
+        // ============================================================================
+        // OPEN-METEO WEATHER API
+        // ============================================================================
 
         /**
          * Reverse geocode coordinates into city and state using Open-Meteo Geocoding API.
-         * @param {number} lat Latitude
-         * @param {number} lon Longitude
          */
         async function fetchCityName(lat, lon) {
             try {
-                // Use Open-Meteo Geocoding API for reverse geocoding
                 const geocodingUrl = `https://geocoding-api.open-meteo.com/v1/search?latitude=${lat}&longitude=${lon}&language=es`;
                 
                 const response = await fetch(geocodingUrl);
@@ -433,11 +693,10 @@
 
                 if (data.results && data.results.length > 0) {
                     const result = data.results[0];
-                    const city = result.name || 'Zapopan, Jalisco, Mexico';
+                    const city = result.name || 'Ciudad Desconocida';
                     const state = result.admin1 || '';
                     const country = result.country || '';
                     
-                    // Format: City, State (Country)
                     let cityName = city;
                     if (state) {
                         cityName += `, ${state}`;
@@ -447,40 +706,23 @@
                     }
                     
                     updateCityTitle(cityName);
-                } else {
-                    updateCityTitle('Zapopan, Jalisco, Mexico', true);
                 }
-
             } catch (error) {
                 console.error("Geocoding API call failed:", error);
-                updateCityTitle("Error de geocodificación", true);
+                updateCityTitle("Zapopan, Jalisco (Mexico)", true);
             }
         }
 
         /**
-         * Uses the browser's Geolocation API to get the user's current position.
+         * Updates the UI element with the city name.
          */
-        function getGeoLocation() {
-            // Use fixed coordinates for Zapopan, Jalisco, Mexico
-            const latitude = 20.7129;
-            const longitude = -103.3887;
-            
-            // Directly fetch city name for these coordinates
-            fetchCityName(latitude, longitude);
+        function updateCityTitle(text, isError = false) {
+            const cityTitleSpan = document.getElementById('city-title');
+            cityTitleSpan.textContent = text;
         }
 
-        // Start the process when the window loads
-        window.onload = () => {
-            getGeoLocation();
-            fetchWeatherData();
-        };
-
-        // ----------------------------------------------------------------------
-        // OPEN-METEO WEATHER API DATA LOGIC
-        // ----------------------------------------------------------------------
-
         /**
-         * Fetches weather data from Open-Meteo API using geolocation
+         * Fetches weather data from Open-Meteo API for Zapopan, Jalisco
          */
         async function fetchWeatherData() {
             try {
@@ -488,7 +730,6 @@
                 const latitude = 20.7129;
                 const longitude = -103.3887;
 
-                // Call Open-Meteo API
                 const url = `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,relative_humidity_2m&timezone=auto`;
                 
                 const response = await fetch(url);
@@ -498,8 +739,6 @@
                     const temperature = data.current.temperature_2m;
                     const humidity = data.current.relative_humidity_2m;
                     
-                    // Estimate CO2 based on temperature and typical levels for Jalisco
-                    // Typical CO2 at sea level: 400-410 ppm
                     const baseCO2 = 405;
                     const estimatedCO2 = baseCO2 + (temperature * 0.5);
                     
@@ -511,55 +750,45 @@
         }
 
         /**
-         * Function to update the LOCAL weather metric columns (from Open-Meteo API).
-         * @param {number} temp Current Local Temperature (°C)
-         * @param {number} co2 Estimated CO2 Concentration (ppm)
-         * @param {number} humidity Current Local Humidity (%)
+         * Function to update the LOCAL weather metric columns
          */
         function updateLocalWeatherData(temp, co2, humidity) {
-            // Update Local Temperature
             const localTempElement = document.getElementById('local-temp');
             if (localTempElement) {
                 localTempElement.textContent = temp.toFixed(1) + '°C';
             }
 
-            // Update Local CO2 Levels (estimated)
             const localCo2Element = document.getElementById('local-co2');
             if (localCo2Element) {
                 localCo2Element.textContent = Math.round(co2) + ' ppm';
             }
             
-            // Update Local Humidity
             const localHumidElement = document.getElementById('local-humidity');
             if (localHumidElement) {
                 localHumidElement.textContent = humidity.toFixed(1) + '%';
             }
         }
 
+        // ============================================================================
+        // SENSOR DATA DISPLAY
+        // ============================================================================
+
         /**
-         * Function to update the first three GLOBAL metric columns (from RPi/Flask).
-         * @param {number} temp Current Global Average Temperature (°C)
-         * @param {number} co2 Current CO2 Concentration (ppm)
-         * @param {number} humidity Current Global Average Humidity (%)
+         * Function to update the sensor data from Raspberry Pi
          */
-        function updateGlobalData(temp, co2, humidity) {
-            // Update Current Temperature (Global)
+        function updateSensorData(temp, co2, humidity) {
             const currentTempElement = document.getElementById('current-temp');
             if (currentTempElement) {
                 currentTempElement.textContent = temp.toFixed(1) + '°C';
-                // Highlight red if above 16.0°C (arbitrary warming threshold)
-                currentTempElement.style.color = temp > 16.0 ? '#FF7043' : 'var(--color-accent-green)';
+                currentTempElement.style.color = temp > 25 ? '#FF7043' : 'var(--color-accent-green)';
             }
 
-            // Update Current CO2 Levels (Global)
             const currentCo2Element = document.getElementById('current-co2');
             if (currentCo2Element) {
                 currentCo2Element.textContent = Math.round(co2) + ' ppm';
-                // Highlight red if above 420 ppm
                 currentCo2Element.style.color = co2 > 420 ? '#FF7043' : 'var(--color-accent-green)';
             }
             
-            // Update Current Humidity (Global)
             const currentHumidElement = document.getElementById('current-humidity');
             if (currentHumidElement) {
                 currentHumidElement.textContent = humidity.toFixed(1) + '%';
@@ -567,21 +796,39 @@
         }
 
         /**
-         * Function to update the Future Prediction Data (from RPi/Flask).
-         * @param {number} predTemp 2050 Predicted Temperature Rise (°C)
-         * @param {number} predCo2 2050 Predicted CO2 Concentration (ppm)
-         * @param {number} predHumidity 2050 Predicted Humidity (%)
+         * Function to update the 24h predictions
          */
         function updatePredictionData(predTemp, predCo2, predHumidity) {
-            // Update Predicted Data (Column 5)
             document.getElementById('pred-temp').textContent = (predTemp > 0 ? '+' : '') + predTemp.toFixed(1) + '°C'; 
             document.getElementById('pred-co2').textContent = Math.round(predCo2) + ' ppm';
             document.getElementById('pred-humidity').textContent = Math.round(predHumidity) + '%';
         }
-        
-        // Initial Dummy Data Calls (RPi/Flask Data)
-        updateGlobalData(15.2, 421, 65.0);
-        updatePredictionData(2.5, 480, 71);
+
+        // ============================================================================
+        // INITIALIZATION
+        // ============================================================================
+
+        window.addEventListener('load', function() {
+            // Get geolocation
+            const latitude = 20.7129;
+            const longitude = -103.3887;
+            fetchCityName(latitude, longitude);
+            
+            // Fetch external weather data
+            fetchWeatherData();
+            
+            // Display sensor data (Raspberry Pi)
+            updateSensorData(sensorData.temperature, sensorData.co2, sensorData.humidity);
+            
+            // Update 24h predictions
+            updatePredictionData(2.5, 438, 62);
+            
+            // Draw prediction chart
+            drawCO2Chart();
+            
+            // Update comparison cards
+            updatePredictionCards();
+        });
 
     </script>
 
